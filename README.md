@@ -92,13 +92,13 @@ make -j$(nproc)
 ### 4. 脚本执行权限
 
 ```bash
-chmod +x ~/Desktop/fast_lio2_nav2_ws/scripts/*.sh
+chmod +x ~/fast_lio2_nav2_ws/scripts/*.sh
 ```
 
 ### 5. 编译工作空间
 
 ```bash
-cd ~/Desktop/fast_lio2_nav2_ws
+cd ~/fast_lio2_nav2_ws
 ./scripts/build.sh
 ```
 
@@ -209,7 +209,7 @@ zsibot_cmd_bridge → zsibot_sdk → 机器狗
 首次克隆后加权限：
 
 ```bash
-chmod +x ~/Desktop/fast_lio2_nav2_ws/scripts/*.sh
+chmod +x ~/fast_lio2_nav2_ws/scripts/*.sh
 ```
 
 ---

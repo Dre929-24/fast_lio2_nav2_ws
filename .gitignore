@@ -5,7 +5,12 @@ log/
 
 # 编译缓存（但保留 SDK 的预编译库）
 *.o
-*.a
+# 排除编译产物，但保留 SDK 的预编译库
+/build/**/*.a
+/install/**/*.a
+!src/driver/livox_ros_driver2/livox_sdk/lib/**/*.a
+!deps/zsibot_sdk/lib/**/*.a
+
 /build/**/*.so
 /install/**/*.so
 

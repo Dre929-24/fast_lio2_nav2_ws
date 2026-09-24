@@ -105,6 +105,13 @@ def generate_launch_description():
         ),
     )
 
+    robot_marker_node = Node(
+        package='robot_marker',
+        executable='robot_marker',
+        name='robot_marker',
+        output='screen',
+    )
+
     # small_gicp_launch = IncludeLaunchDescription(
     #     PythonLaunchDescriptionSource(
     #         os.path.join(
@@ -142,7 +149,7 @@ def generate_launch_description():
         static_tf_map_to_odom,
         pointcloud_to_laserscan,
         zsibot_cmd_bridge_launch,
-
+        robot_marker_node,
         # 延迟启动：等 TF 稳定后再启重定位
         # TimerAction(period=3.0, actions=[small_gicp_launch]),
 
