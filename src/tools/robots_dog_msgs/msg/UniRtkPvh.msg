@@ -1,0 +1,10 @@
+std_msgs/Header header
+float64 latitude
+float64 longitude
+float64 altitude
+float64 velocity_north
+float64 velocity_east
+float64 velocity_down
+float64 heading
+uint8 fix_type
+uint8 num_satellites
