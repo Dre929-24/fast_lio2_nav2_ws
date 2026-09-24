@@ -76,7 +76,7 @@ sudo apt install -y \
 ```bash
 # 已放在 deps/zsibot_sdk/
 # 需要单独编译 highlevel_demo：
-cd ~/Desktop/fast_lio2_nav2_ws/deps/zsibot_sdk/demo/zsl-1/cpp
+cd ~/fast_lio2_nav2_ws/deps/zsibot_sdk/demo/zsl-1/cpp
 mkdir -p build && cd build
 cmake ..
 make -j$(nproc)
@@ -134,10 +134,9 @@ RViz 里点击 **`2D Goal Pose`**，在地图上点一个位置，拖动指定�
 ```
 fast_lio2_nav2_ws/
 ├── deps/zsibot_sdk/                # 机器狗控制 SDK
-├── driver/livox_ros_driver2/       # 激光雷达驱动
 ├── scripts/                        # 启动脚本
 │   ├── build.sh
-│   ├── sim_start.sh                # TODO: 修改仿真路径
+│   ├── sim_start.sh
 │   ├── rmw_zenohd.sh
 │   ├── fast_lio.sh
 │   ├── save_map.sh
@@ -149,17 +148,19 @@ fast_lio2_nav2_ws/
     ├── bridge/                     # 桥接层
     │   ├── mujoco_tf_bridge/
     │   ├── ue_zenoh_bridge/
-    │   └── zsibot_cmd_bridge/      # TODO: 真机部署时改 dog_ip
+    │   └── zsibot_cmd_bridge/
+    ├── driver/                     # 激光雷达驱动
+    │   └── livox_ros_driver2/
     ├── localization/               # 定位层
-    │   ├── fast_lio/               # TODO: 改 map_file_path
+    │   ├── fast_lio/
     │   ├── lio_interface/
     │   └── small_gicp_relocalization/
-    ├── navigation/me_nav2_bringup/ # TODO: 改 rt_nav_launch.py 里的地图路径
+    ├── navigation/me_nav2_bringup/           # 导航层
     │   ├── launch/
     │   ├── config/nav2_params.yaml
     │   ├── rviz/
     │   └── my_maps/
-    └── tools/
+    └── tools/                     #工具层
         ├── pcd2pgm/
         └── robot_marker/
 ```
@@ -278,6 +279,7 @@ common:
 
 preprocess:
   lidar_type: 4
+```
 
 ### 速度限制链
 
@@ -349,4 +351,4 @@ Add → MarkerArray → Topic `/robot_marker`。
 
 ## 📄 License
 
-Apache-1.0
+Apache-2.0

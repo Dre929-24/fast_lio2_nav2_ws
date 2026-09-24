@@ -3,10 +3,15 @@ build/
 install/
 log/
 
-# 编译缓存
+# 编译缓存（但保留 SDK 的预编译库）
 *.o
-*.so
 *.a
+/build/**/*.so
+/install/**/*.so
+
+# 保留 SDK 的预编译库
+!deps/zsibot_sdk/lib/**/*.so
+!deps/zsibot_sdk/lib/**/*.a
 
 # Python 缓存
 __pycache__/
@@ -23,15 +28,6 @@ __pycache__/
 # 临时文件
 *.tmp
 *.log
-
-# 地图数据（可选，视需要保留）
-# my_maps/*.pgm
-# my_maps/*.yaml
-# my_maps/*.pcd
-
-# SDK 编译产物
-deps/zsibot_sdk/demo/*/cpp/build/
-deps/zsibot_sdk/demo/*/python/__pycache__/
 
 # 日志
 ~/.ros/
