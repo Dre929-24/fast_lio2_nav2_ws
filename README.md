@@ -18,15 +18,14 @@ cd ~/Desktop/matrix_robotac_first
 
 **改成你的 RobotAC 仿真目录。**
 
-### 2. `src/navigation/me_nav2_bringup/launch/rt_nav_launch.py`
+### 2. `src/navigation/me_nav2_bringup/launch/my_nav2_launch.py`
 
 ```python
 # TODO: 改成你的地图文件路径
-default_pcd = os.path.join(me_share, 'my_maps', 'test.pcd')
-default_map_yaml = os.path.join(me_share, 'my_maps', 'map_20260924_125144.yaml')
+map_yaml_file = os.path.join(me_share_path, 'my_maps', 'map.yaml')
 ```
 
-**改成你实际生成的 PCD 和 YAML 文件名。**
+**改成你实际生成的 YAML 文件名。**
 
 ### 3. `src/bridge/zsibot_cmd_bridge/launch/zsibot_cmd_bridge_launch.py`
 

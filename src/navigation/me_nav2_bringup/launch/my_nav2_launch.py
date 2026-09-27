@@ -11,8 +11,9 @@ def generate_launch_description():
     me_share_path = get_package_share_directory('me_nav2_bringup')
 
     # 配置文件与地图路径
+    # TODO: 改成你的地图文件路径
     params_file = os.path.join(me_share_path, 'config', 'nav2_params.yaml')
-    map_yaml_file = '/home/dre929/Desktop/fast_lio2_ws/maps/map.yaml'
+    map_yaml_file = os.path.join(me_share_path, 'my_maps', 'map_20260924_125144.yaml')
     rviz_file = os.path.join(me_share_path, 'rviz', 'my_nav2.rviz')
     
     # 是否使用仿真时间

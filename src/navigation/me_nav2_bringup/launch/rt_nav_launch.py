@@ -13,25 +13,6 @@ from launch_ros.actions import Node
 def generate_launch_description():
     me_share = get_package_share_directory('me_nav2_bringup')
 
-    # TODO: 改成你的地图文件路径
-    default_pcd = os.path.join(me_share, 'my_maps', 'test.pcd')
-    default_map_yaml = os.path.join(me_share, 'my_maps', 'map_20260924_125144.yaml')
-
-    pcd_file = LaunchConfiguration('pcd_file')
-    map_yaml = LaunchConfiguration('map_yaml')
-
-    declare_pcd_file = DeclareLaunchArgument(
-        'pcd_file',
-        default_value=default_pcd,
-        description='3D PCD 先验地图的绝对路径'
-    )
-
-    declare_map_yaml = DeclareLaunchArgument(
-        'map_yaml',
-        default_value=default_map_yaml,
-        description='2D 栅格地图的绝对路径'
-    )
-
     # odom → base_link
     mujoco_tf_bridge_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -120,9 +101,6 @@ def generate_launch_description():
     #             'small_gicp_relocalization_launch.py'
     #         )
     #     ),
-    #     launch_arguments={
-    #         'prior_pcd_file': pcd_file,
-    #     }.items(),
     # )
 
     nav2_launch = IncludeLaunchDescription(
@@ -134,15 +112,11 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            'map_yaml_file': map_yaml,
             'use_sim_time': 'false',
         }.items(),
     )
 
     return LaunchDescription([
-        declare_pcd_file,
-        declare_map_yaml,
-
         # 立即启动：TF 桥接 + 静态 TF
         mujoco_tf_bridge_launch,
         static_tf_base_to_lidar,
