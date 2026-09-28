@@ -19,7 +19,7 @@ bt_navigator:
 controller_server:
   ros__parameters:
     use_sim_time: False
-    controller_frequency: 20.0        # 控制器运行的频率（Hz），即向底盘发cmd_vel的频率
+    controller_frequency: 10.0        # 控制器运行的频率（Hz），即向底盘发cmd_vel的频率
     min_x_velocity_threshold: 0.001   # X方向最小速度阈值（避免极小值导致电机抖动）
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
@@ -38,21 +38,21 @@ controller_server:
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.035         # 到达目标的XY坐标允许误差（米）
-      yaw_goal_tolerance: 0.1745       # 10度 到达目标的角度允许误差（弧度）
+      xy_goal_tolerance: 0.4         # 到达目标的XY坐标允许误差（米）
+      yaw_goal_tolerance: 0.25       # 14.3度 到达目标的角度允许误差（弧度）
 
     # 局部控制器(DWB)配置
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: True
-      min_vel_x: -1.0                  # 最小线速度（不支持倒车设为0，支持可设为负）
+      min_vel_x: 0.0                  # 最小线速度（不支持倒车设为0，支持可设为负）
       min_vel_y: 0.0                  # Y方向速度（差速车为0）
       max_vel_x: 1.0                  # 最大X线速度（m/s）
       max_vel_y: 0.0
-      max_vel_theta: 1.5              # 最大角速度（rad/s）
-      min_speed_xy: 0.0               # XY平面的最小合速度
+      max_vel_theta: 1.0              # 最大角速度（rad/s）
+      min_speed_xy: 0.05               # XY平面的最小合速度
       max_speed_xy: 1.0               # 必须与 max_vel_x 同步放大
-      min_speed_theta: 0.0
+      min_speed_theta: 0.15
       acc_lim_x: 2.5                  # X方向最大加速度 (m/s^2)
       acc_lim_y: 2.5 
       acc_lim_theta: 3.2              # 最大角加速度 (rad/s^2)
@@ -64,13 +64,14 @@ controller_server:
       vtheta_samples: 20              # 旋转速度采样数量
       sim_time: 1.7                   # 预测未来轨迹的时长（秒）
       # DWB评价函数（Critics），用于给采样出的轨迹打分，分数越低越好
-      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+      # critics: ["Oscillation", "BaseObstacle", "PathAlign", "PathDist", "GoalDist"]
+      critics: ["BaseObstacle", "PathAlign", "PathDist", "GoalDist"]
       BaseObstacle.scale: 10.0         # 避障得分权重，数值越大越远离障碍物
       PathAlign.scale: 32.0           # 轨迹与全局路径对齐的权重
       GoalAlign.scale: 24.0           # 机器人朝向对准目标的权重
       PathDist.scale: 32.0            # 轨迹贴合全局路径的权重
       GoalDist.scale: 24.0            # 轨迹接近目标的权重
-      RotateToGoal.scale: 32.0        # 到达目标点附近时允许原地旋转对齐的权重
+      # RotateToGoal.scale: 32.0        # 到达目标点附近时允许原地旋转对齐的权重
 
 # # 局部代价地图配置
 # local_costmap:
@@ -170,7 +171,7 @@ local_costmap:
       width: 6                        # 保持 5x5 米的开阔局部窗口
       height: 6
       resolution: 0.05    # 分辨率为5cm
-      footprint: "[ [0.25, 0.18], [0.25, -0.18], [-0.25, -0.18], [-0.25, 0.18] ]"
+      footprint: "[ [0.25, 0.22], [0.25, -0.22], [-0.25, -0.22], [-0.25, 0.22] ]"
       plugins: ["obstacle_layer", "inflation_layer"] # 彻底采用纯平面层接2D scan
       footprint_clearing_enabled: true    # 开启局部地图轮廓清理
       combination_method: 1
@@ -196,7 +197,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 5.0  # 代价衰减速度因子，越小，机器离的越远
-        inflation_radius: 0.6    # 膨胀半径，越大，机器人离的越远
+        inflation_radius: 0.4    # 膨胀半径，越大，机器人离的越远
 
 # 全局代价地图
 global_costmap:
@@ -207,7 +208,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: False
-      footprint: "[ [0.21, 0.195], [0.21, -0.195], [-0.21, -0.195], [-0.21, 0.195] ]"
+      footprint: "[ [0.25, 0.22], [0.25, -0.22], [-0.25, -0.22], [-0.25, 0.22] ]"
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -236,8 +237,8 @@ global_costmap:
           
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
-        inflation_radius: 0.3
+        cost_scaling_factor: 5.0
+        inflation_radius: 0.4
 
 # 静态地图服务器配置
 map_server:
