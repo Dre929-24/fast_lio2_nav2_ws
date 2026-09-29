@@ -1,0 +1,11 @@
+apriltag:
+  ros__parameters:
+    image_transport: compressed
+    family: 36h11
+    size: 0.053          # 改成实际 Tag 的边长（米）
+    max_hamming: 0
+    z_up: false
+    pose_estimation_method: "pnp"
+    # tag:
+    #   ids: [0, 1, 2]    # 三个 Tag ID
+    #   frames: [tag_0, tag_1, tag_2]

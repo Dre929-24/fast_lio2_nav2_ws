@@ -1,6 +1,6 @@
 # RobotAC 四足机器狗自主导航系统
 
-基于 FAST-LIO + Nav2 + zsibot SDK 的四足机器狗自主导航方案。
+基于 FAST-LIO + Nav2 + zsibot SDK 的四足机器狗自主导航方案，集成 AprilTag 检测与视觉对准。
 
 ---
 
@@ -16,16 +16,12 @@ cd ~/Desktop/matrix_robotac_first
 ./run_sim.sh
 ```
 
-**改成你的 RobotAC 仿真目录。**
-
 ### 2. `src/navigation/me_nav2_bringup/launch/my_nav2_launch.py`
 
 ```python
 # TODO: 改成你的地图文件路径
 map_yaml_file = os.path.join(me_share_path, 'my_maps', 'map.yaml')
 ```
-
-**改成你实际生成的 YAML 文件名。**
 
 ### 3. `src/bridge/zsibot_cmd_bridge/launch/zsibot_cmd_bridge_launch.py`
 
@@ -62,30 +58,24 @@ sudo apt install -y \
     ros-humble-pcl-ros \
     ros-humble-pcl-conversions \
     ros-humble-rmw-zenoh-cpp \
+    ros-humble-apriltag-ros \
+    ros-humble-cv-bridge \
     libeigen3-dev \
     libpcl-dev \
+    libopencv-dev \
     cmake \
     build-essential
 ```
 
 ### 3. 外部 SDK
 
-**zsibot_sdk**（机器狗控制 SDK）：
+**zsibot_sdk**：
 
 ```bash
-# 已放在 deps/zsibot_sdk/
-# 需要单独编译 highlevel_demo：
 cd ~/fast_lio2_nav2_ws/deps/zsibot_sdk/demo/zsl-1/cpp
 mkdir -p build && cd build
 cmake ..
 make -j$(nproc)
-```
-
-**livox_ros_driver2**（激光雷达驱动，编译依赖）：
-
-```bash
-# 已放在 driver/livox_ros_driver2/
-# colcon 编译时会自动处理
 ```
 
 ### 4. 脚本执行权限
@@ -105,10 +95,9 @@ cd ~/fast_lio2_nav2_ws
 
 ## 🚀 快速开始
 
-### 启动（4 个终端）
+### 导航启动（4 个终端）
 
 ```bash
-
 # 终端 1：Zenoh 路由
 ./scripts/rmw_zenohd.sh
 
@@ -125,6 +114,49 @@ cd ~/fast_lio2_nav2_ws
 ### 发送目标点
 
 RViz 里点击 **`2D Goal Pose`**，在地图上点一个位置，拖动指定朝向，松开即可。
+
+---
+
+## 🎯 AprilTag 检测与对准
+
+### 功能
+
+- **三种输入模式**：图片、视频、摄像头
+- **Tag 检测**：识别 `36h11` 家族的 Tag
+- **可视化**：
+  - 每个 Tag 框内显示 `ID` 和 `Confidence`
+  - 图像左上角汇总所有 Tag 的 `ID`、`Center`、`Distance`、`Confidence`
+- **距离估算**：基于 Tag 的像素边长和相机内参
+
+### 一键启动
+
+**图片模式**：
+
+```bash
+cd ~/fast_lio2_nav2_ws
+source install/setup.bash
+
+ros2 launch src/apriltag_demo/Aprili_config/apriltag_demo_launch.py \
+  mode:=image \
+  file_path:=$HOME/fast_lio2_nav2_ws/src/apriltag_demo/assert/images/0.png
+```
+
+**视频模式**：
+
+```bash
+ros2 launch src/apriltag_demo/Aprili_config/apriltag_demo_launch.py \
+  mode:=video \
+  file_path:=$HOME/fast_lio2_nav2_ws/src/apriltag_demo/assert/video/test.mp4
+```
+
+**摄像头模式**：
+
+```bash
+ros2 launch src/apriltag_demo/Aprili_config/apriltag_demo_launch.py \
+  mode:=camera \
+  camera_id:=0 \
+  publish_rate:=30.0
+```
 
 ---
 
@@ -154,12 +186,22 @@ fast_lio2_nav2_ws/
     │   ├── fast_lio/
     │   ├── lio_interface/
     │   └── small_gicp_relocalization/
-    ├── navigation/me_nav2_bringup/           # 导航层
+    ├── navigation/me_nav2_bringup/ # 导航层
     │   ├── launch/
     │   ├── config/nav2_params.yaml
     │   ├── rviz/
     │   └── my_maps/
-    └── tools/                     #工具层
+    ├── apriltag_demo/              # AprilTag 检测与可视化
+    │   ├── Aprili_config/
+    │   │   ├── apriltag_params.yaml
+    │   │   └── apriltag_demo_launch.py
+    │   ├── assert/
+    │   │   ├── images/             # 测试图片
+    │   │   └── video/              # 测试视频
+    │   ├── media_publisher/        # 图片/视频/摄像头发布
+    │   ├── camera_info_pub/        # 相机内参发布
+    │   └── camera_viewer/          # 可视化
+    └── tools/
         ├── pcd2pgm/
         └── robot_marker/
 ```
@@ -167,6 +209,8 @@ fast_lio2_nav2_ws/
 ---
 
 ## 🏗️ 架构
+
+### 导航链路
 
 ```
 RobotAC 仿真
@@ -181,6 +225,22 @@ Nav2（planner_server → controller_server → /cmd_vel）
 zsibot_cmd_bridge → zsibot_sdk → 机器狗
 ```
 
+### AprilTag 检测链路
+
+```
+图片/视频/摄像头
+        ↓
+media_publisher（发布 CompressedImage）
+        ↓
+camera_info_pub（发布 CameraInfo，时间戳同步）
+        ↓
+apriltag_ros（检测 Tag）
+        ↓
+/detections（Tag ID、中心、角点、decision_margin）
+        ↓
+camera_viewer（可视化：框、ID、距离、置信度）
+```
+
 | 模块 | 职责 |
 |------|------|
 | `mujoco_tf_bridge` | MuJoCo 里程计 → `odom → base_link` TF |
@@ -188,6 +248,9 @@ zsibot_cmd_bridge → zsibot_sdk → 机器狗
 | `planner_server` | 全局路径规划 |
 | `controller_server` | 局部速度控制 → `/cmd_vel` |
 | `zsibot_cmd_bridge` | `/cmd_vel` → SDK 指令 |
+| `media_publisher` | 发布图片/视频/摄像头图像 |
+| `camera_info_pub` | 发布相机内参 |
+| `camera_viewer` | AprilTag 可视化 |
 
 ---
 
@@ -218,23 +281,12 @@ chmod +x ~/fast_lio2_nav2_ws/scripts/*.sh
 ### 建图
 
 ```bash
-# 开启路由
-./scripts/rmw_zenohd.sh     
-
-# 开启仿真
-./scripts/sim_start.sh       
-
-# 开启建图
-./scripts/fast_lio.sh        
-
-# 手动控制，键盘 WASD 控制（j,k 控制速度）
-./scripts/manual_control.sh  
-
-# 保存 PCD
-./scripts/save_map.sh
-
-# 转 2D 地图
-./scripts/pcd2pgm.sh         
+./scripts/rmw_zenohd.sh     # 终端 1
+./scripts/sim_start.sh      # 终端 2
+./scripts/fast_lio.sh       # 终端 3
+./scripts/manual_control.sh # 终端 4，键盘 WASD 控制
+./scripts/save_map.sh       # 保存 PCD
+./scripts/pcd2pgm.sh        # 转 2D 地图
 ```
 
 ### 导航
@@ -244,6 +296,14 @@ chmod +x ~/fast_lio2_nav2_ws/scripts/*.sh
 ./scripts/sim_start.sh       # 终端 2
 ./scripts/nav_start.sh       # 终端 3
 # RViz 里点 2D Goal Pose
+```
+
+### AprilTag 检测
+
+```bash
+ros2 launch src/apriltag_demo/Aprili_config/apriltag_demo_launch.py \
+  mode:=image \
+  file_path:=$HOME/fast_lio2_nav2_ws/src/apriltag_demo/assert/images/0.png
 ```
 
 ---
@@ -345,6 +405,7 @@ Add → MarkerArray → Topic `/robot_marker`。
 - 定位用 **MuJoCo 真值里程计**，无漂移
 - FAST-LIO 仅用于**建图阶段**
 - `small_gicp_relocalization` 和 `lio_interface` 为**真机部署预留**
+- **AprilTag 检测**支持图片、视频、摄像头三种输入
 
 ---
 
